@@ -2,7 +2,7 @@
 
 ## Dreamer 4 (wip)
 
-Implementation of Danijar's [latest iteration](https://arxiv.org/abs/2509.24527v1) for his Dreamer line of work
+Implementation of Danijar's [latest iteration](https://arxiv.org/abs/2509.24527v1) for his [Dreamer](https://danijar.com/project/dreamer4/) line of work
 
 ## Citation
 
