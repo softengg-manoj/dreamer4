@@ -1,7 +1,21 @@
+from __future__ import annotations
+
+import math
+from functools import partial
+
 import torch
 import torch.nn.functional as F
-from torch.nn import Module, ModuleList, RMSNorm, Identity
+from torch.nn import Module, ModuleList, Linear, RMSNorm, Identity
 from torch import cat, stack, tensor, Tensor, is_tensor
+
+# ein related
+
+from einops import einsum, rearrange, repeat, reduce
+from einops.layers.torch import Rearrange
+
+# constants
+
+LinearNoBias = partial(Linear, bias = False)
 
 # helpers
 
