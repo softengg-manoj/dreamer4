@@ -1,3 +1,5 @@
+<img src="./dreamer4-fig2.png" width="400px"></img>
+
 ## Dreamer 4 (wip)
 
 Implementation of Danijar's [latest iteration](https://arxiv.org/abs/2509.24527v1) for his Dreamer line of work
