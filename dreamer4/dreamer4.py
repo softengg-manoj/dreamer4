@@ -291,15 +291,28 @@ class SwiGLUFeedforward(Module):
 
 class VideoTokenizer(Module):
     def __init__(
-        self
+        self,
+        dim,
+        dim_latent
     ):
         super().__init__()
+
+        self.encoded_to_latents = Sequential(
+            LinearNoBias(dim, dim_latent),
+            nn.Tanh(),
+        )
+
+        self.latents_to_decoder = LinearNoBias(dim_latent, dim)
+
+# dynamics model
 
 class DynamicsModel(Module):
     def __init__(
         self
     ):
         super().__init__()
+
+# dreamer
 
 class Dreamer(Module):
     def __init__(
