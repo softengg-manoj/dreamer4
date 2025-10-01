@@ -17,3 +17,12 @@ Implementation of Danijar's [latest iteration](https://arxiv.org/abs/2509.24527v
     url     = {https://arxiv.org/abs/2509.24527}, 
 }
 ```
+
+```bibtex
+@misc{xiong2025ndrope,
+    author = {Jerry Xiong},
+    title  = {On n-dimensional rotary positional embeddings},
+    year   = {2025},
+    url    = {https://jerryxio.ng/posts/nd-rope/}
+}
+```
