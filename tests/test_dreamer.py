@@ -2,9 +2,9 @@ import pytest
 param = pytest.mark.parametrize
 import torch
 
-@param('pred_is_clean_latents', (False, True))
+@param('pred_orig_latent', (False, True))
 def test_e2e(
-    pred_is_clean_latents
+    pred_orig_latent
 ):
     from dreamer4.dreamer4 import VideoTokenizer, DynamicsModel
 
@@ -17,7 +17,7 @@ def test_e2e(
     latents = tokenizer(x, return_latents = True)
     assert latents.shape[-1] == 32
 
-    dynamics = DynamicsModel(512, dim_latent = 32, num_signal_levels = 500, num_step_sizes = 32, pred_is_clean_latents = pred_is_clean_latents)
+    dynamics = DynamicsModel(512, dim_latent = 32, num_signal_levels = 500, num_step_sizes = 32, pred_orig_latent = pred_orig_latent)
 
     signal_levels = torch.randint(0, 500, (2, 4))
     step_sizes = torch.randint(0, 32, (2, 4))
