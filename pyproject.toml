@@ -29,7 +29,8 @@ dependencies = [
     "accelerate",
     "einx>=0.3.0",
     "einops>=0.8.1",
-    "torch>=2.4"
+    "torch>=2.4",
+    "x-mlps-pytorch"
 ]
 
 [project.urls]
