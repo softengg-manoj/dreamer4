@@ -24,3 +24,6 @@ def test_tokenizer():
 
     loss = tokenizer(x)
     assert loss.numel() == 1
+
+    latents = tokenizer(x, return_latents = True)
+    assert latents.shape[-1] == 32
