@@ -450,9 +450,7 @@ class VideoTokenizer(Module):
         if mask_patches:
             min_mask_prob, max_mask_prob = self.per_image_patch_mask_prob
 
-            uniform_prob = torch.rand(tokens.shape[:2], device = tokens.device) # (b t)
-
-            mask_prob = uniform_prob * (max_mask_prob - min_mask_prob) + min_mask_prob
+            mask_prob = torch.empty(tokens.shape[:2], device = tokens.device).uniform_(min_mask_prob, max_mask_prob) # (b t)
 
             mask_prob = repeat(mask_prob, 'b t -> b t vh vw', vh = tokens.shape[2], vw = tokens.shape[3])
             mask_patch = torch.bernoulli(mask_prob) == 1.
