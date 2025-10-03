@@ -24,3 +24,15 @@ def test_e2e(
 
     flow_loss = dynamics(latents, signal_levels = signal_levels, step_sizes = step_sizes)
     assert flow_loss.numel() == 1
+
+def test_symexp_two_hot():
+    import torch
+    from dreamer4.dreamer4 import SymExpTwoHot
+
+    two_hot_encoder = SymExpTwoHot((-3., 3.), 20)
+    values = torch.randn((10))
+
+    encoded = two_hot_encoder(values)
+    recon_values = two_hot_encoder.logits_to_scalar_value(encoded)
+
+    assert torch.allclose(recon_values, values, atol = 1e-6)
