@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from collections import namedtuple
 from functools import partial
 
 import torch
@@ -48,6 +49,8 @@ except ImportError:
 # constants
 
 LinearNoBias = partial(Linear, bias = False)
+
+TokenizerLosses = namedtuple('TokenizerLosses', ('recon', 'lpips'))
 
 # helpers
 
@@ -780,7 +783,7 @@ class VideoTokenizer(Module):
 
         losses = (recon_loss, lpips_loss)
 
-        return total_loss, losses
+        return total_loss, TokenizerLosses(losses)
 
 # dynamics model, axial space-time transformer
 
