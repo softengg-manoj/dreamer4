@@ -64,11 +64,15 @@ def test_symexp_two_hot():
 @param('softclamp_value', (50., None))
 @param('num_agent_tokens', (0, 1))
 @param('causal_block_size', (1, 8))
+@param('block_size_per_special', (1, 8))
+@param('special_attend_only_itself', (False, True))
 def test_attend_factory(
     causal,
     softclamp_value,
     num_agent_tokens,
-    causal_block_size
+    causal_block_size,
+    block_size_per_special,
+    special_attend_only_itself
 ):
 
     from dreamer4.dreamer4 import get_attend_fn
@@ -84,7 +88,9 @@ def test_attend_factory(
         causal_block_size = causal_block_size,
         softclamp_value = softclamp_value,
         device = q.device,
-        num_agent_tokens = num_agent_tokens
+        num_agent_tokens = num_agent_tokens,
+        block_size_per_special = block_size_per_special,
+        special_attend_only_itself = special_attend_only_itself
     )
 
     attend = get_attend_fn(True, **attend_kwargs)
