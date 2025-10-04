@@ -58,3 +58,29 @@ def test_symexp_two_hot():
     recon_values = two_hot_encoder.logits_to_scalar_value(encoded)
 
     assert torch.allclose(recon_values, values, atol = 1e-6)
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason = 'no cuda')
+@param('causal', (False, True))
+@param('softclamp_value', (50., None))
+@param('num_agent_tokens', (0, 1))
+def test_attend_factory(
+    causal,
+    softclamp_value,
+    num_agent_tokens
+):
+
+    from dreamer4.dreamer4 import get_attend_fn
+
+    q = torch.randn(1, 8, 1024, 512).cuda()
+    k = torch.randn(1, 4, 1024, 512).cuda()
+    v = torch.randn(1, 4, 1024, 512).cuda()
+
+    attend_kwargs = dict(seq_len = 1024, k_seq_len = 1024, causal = causal, softclamp_value = softclamp_value, device = q.device, num_agent_tokens = num_agent_tokens)
+
+    attend = get_attend_fn(True, **attend_kwargs)
+    flex_out = attend(q, k, v)
+
+    attend = get_attend_fn(False, **attend_kwargs)
+    out = attend(q, k, v)
+
+    assert torch.allclose(flex_out, out, atol = 1e-6)
