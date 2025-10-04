@@ -32,6 +32,7 @@ dependencies = [
     "einops>=0.8.1",
     "hl-gauss-pytorch",
     "torch>=2.4",
+    "torchvision",
     "x-mlps-pytorch"
 ]
 
