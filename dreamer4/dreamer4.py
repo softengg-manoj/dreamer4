@@ -13,6 +13,7 @@ import torchvision
 from torchvision.models import VGG16_Weights
 
 from x_mlps_pytorch import create_mlp
+from x_mlps_pytorch.ensemble import Ensemble
 
 from accelerate import Accelerator
 
@@ -802,6 +803,7 @@ class DynamicsModel(Module):
         ),
         ff_kwargs: dict = dict(),
         loss_weight_fn: Callable = ramp_weight,
+        num_future_predictions = 8  # they do multi-token prediction of 8 steps forward
     ):
         super().__init__()
 
