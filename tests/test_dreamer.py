@@ -63,10 +63,12 @@ def test_symexp_two_hot():
 @param('causal', (False, True))
 @param('softclamp_value', (50., None))
 @param('num_agent_tokens', (0, 1))
+@param('causal_block_size', (1, 8))
 def test_attend_factory(
     causal,
     softclamp_value,
-    num_agent_tokens
+    num_agent_tokens,
+    causal_block_size
 ):
 
     from dreamer4.dreamer4 import get_attend_fn
@@ -75,7 +77,15 @@ def test_attend_factory(
     k = torch.randn(1, 4, 1024, 512).cuda()
     v = torch.randn(1, 4, 1024, 512).cuda()
 
-    attend_kwargs = dict(seq_len = 1024, k_seq_len = 1024, causal = causal, softclamp_value = softclamp_value, device = q.device, num_agent_tokens = num_agent_tokens)
+    attend_kwargs = dict(
+        seq_len = 1024,
+        k_seq_len = 1024,
+        causal = causal,
+        causal_block_size = causal_block_size,
+        softclamp_value = softclamp_value,
+        device = q.device,
+        num_agent_tokens = num_agent_tokens
+    )
 
     attend = get_attend_fn(True, **attend_kwargs)
     flex_out = attend(q, k, v)
