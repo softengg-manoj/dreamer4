@@ -3,8 +3,10 @@ param = pytest.mark.parametrize
 import torch
 
 @param('pred_orig_latent', (False, True))
+@param('gqa', (False, True))
 def test_e2e(
-    pred_orig_latent
+    pred_orig_latent,
+    gqa
 ):
     from dreamer4.dreamer4 import VideoTokenizer, DynamicsModel
 
@@ -17,7 +19,19 @@ def test_e2e(
     latents = tokenizer(x, return_latents = True)
     assert latents.shape[-1] == 32
 
-    dynamics = DynamicsModel(512, dim_latent = 32, num_signal_levels = 500, num_step_sizes = 32, pred_orig_latent = pred_orig_latent)
+    query_heads, heads = (16, 4) if gqa else (8, 8)
+
+    dynamics = DynamicsModel(
+        512,
+        dim_latent = 32,
+        num_signal_levels = 500,
+        num_step_sizes = 32,
+        pred_orig_latent = pred_orig_latent,
+        attn_kwargs = dict(
+            heads = heads,
+            query_heads = query_heads
+        )
+    )
 
     signal_levels = torch.randint(0, 500, (2, 4))
     step_sizes = torch.randint(0, 32, (2, 4))
