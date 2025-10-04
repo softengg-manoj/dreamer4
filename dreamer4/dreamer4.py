@@ -698,6 +698,7 @@ class DynamicsModel(Module):
         self,
         dim,
         dim_latent,
+        video_tokenizer: VideoTokenizer | None = None,
         num_signal_levels = 500,
         num_step_sizes = 32,
         num_spatial_tokens = 32,   # latents were projected into spatial tokens, and presumably pooled back for the final prediction (or one special one does the x-prediction)
@@ -713,6 +714,10 @@ class DynamicsModel(Module):
         loss_weight_fn: Callable = ramp_weight,
     ):
         super().__init__()
+
+        # can accept raw video if tokenizer is passed in
+
+        self.video_tokenizer = video_tokenizer
 
         # spatial and register tokens
 
@@ -769,12 +774,34 @@ class DynamicsModel(Module):
             Linear(dim, dim_latent)
         )
 
+    def parameter(self):
+        params = super().parameters()
+
+        if not exists(self.video_tokenizer):
+            return params
+
+        return list(set(params) - set(self.video_tokenizer.parameters()))
+
     def forward(
         self,
-        latents,                    # (b t d)
+        *,
+        video = None,
+        latents = None,             # (b t d)
         signal_levels = None,       # (b t)
         step_sizes = None           # (b t)
     ):
+        # handle video or latents
+
+        assert exists(video) ^ exists(latents)
+
+        if exists(video):
+            assert exists(self.video_tokenizer), 'video_tokenizer must be passed in if training from raw video on dynamics model'
+
+            with torch.no_grad():
+                self.video_tokenizer.eval()
+                latents = self.video_tokenizer(video, return_latents = True)
+
+        # flow related
 
         assert not (exists(signal_levels) ^ exists(step_sizes))
 

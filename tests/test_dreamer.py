@@ -3,26 +3,29 @@ param = pytest.mark.parametrize
 import torch
 
 @param('pred_orig_latent', (False, True))
-@param('gqa', (False, True))
+@param('grouped_query_attn', (False, True))
+@param('dynamics_with_video_input', (False, True))
 def test_e2e(
     pred_orig_latent,
-    gqa
+    grouped_query_attn,
+    dynamics_with_video_input
 ):
     from dreamer4.dreamer4 import VideoTokenizer, DynamicsModel
 
     tokenizer = VideoTokenizer(512, dim_latent = 32, patch_size = 32)
-    x = torch.randn(2, 3, 4, 256, 256)
+    video = torch.randn(2, 3, 4, 256, 256)
 
-    loss = tokenizer(x)
+    loss = tokenizer(video)
     assert loss.numel() == 1
 
-    latents = tokenizer(x, return_latents = True)
+    latents = tokenizer(video, return_latents = True)
     assert latents.shape[-1] == 32
 
-    query_heads, heads = (16, 4) if gqa else (8, 8)
+    query_heads, heads = (16, 4) if grouped_query_attn else (8, 8)
 
     dynamics = DynamicsModel(
         512,
+        video_tokenizer = tokenizer,
         dim_latent = 32,
         num_signal_levels = 500,
         num_step_sizes = 32,
@@ -36,7 +39,12 @@ def test_e2e(
     signal_levels = torch.randint(0, 500, (2, 4))
     step_sizes = torch.randint(0, 32, (2, 4))
 
-    flow_loss = dynamics(latents, signal_levels = signal_levels, step_sizes = step_sizes)
+    if dynamics_with_video_input:
+        dynamics_input = dict(video = video)
+    else:
+        dynamics_input = dict(latents = latents)
+
+    flow_loss = dynamics(**dynamics_input, signal_levels = signal_levels, step_sizes = step_sizes)
     assert flow_loss.numel() == 1
 
 def test_symexp_two_hot():
