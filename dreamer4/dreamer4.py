@@ -1036,7 +1036,7 @@ class DynamicsModel(Module):
 
         self.action_learned_embed = Parameter(torch.randn(dim) * 1e-2)
 
-        self.num_task = num_tasks
+        self.num_tasks = num_tasks
         self.task_embed = nn.Embedding(num_tasks, dim)
 
         # calculate "space" seq len
