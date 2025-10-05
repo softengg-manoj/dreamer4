@@ -6,11 +6,13 @@ import torch
 @param('grouped_query_attn', (False, True))
 @param('dynamics_with_video_input', (False, True))
 @param('prob_no_shortcut_train', (None, 0., 1.))
+@param('add_task_embeds', (False, True))
 def test_e2e(
     pred_orig_latent,
     grouped_query_attn,
     dynamics_with_video_input,
-    prob_no_shortcut_train
+    prob_no_shortcut_train,
+    add_task_embeds
 ):
     from dreamer4.dreamer4 import VideoTokenizer, DynamicsModel
 
@@ -30,6 +32,7 @@ def test_e2e(
         video_tokenizer = tokenizer,
         dim_latent = 32,
         max_steps = 64,
+        num_tasks = 4,
         pred_orig_latent = pred_orig_latent,
         attn_kwargs = dict(
             heads = heads,
@@ -46,7 +49,17 @@ def test_e2e(
     else:
         dynamics_input = dict(latents = latents)
 
-    flow_loss = dynamics(**dynamics_input, signal_levels = signal_levels, step_sizes_log2 = step_sizes_log2)
+    tasks = None
+    if add_task_embeds:
+        tasks = torch.randint(0, 4, (2,))
+
+    flow_loss = dynamics(
+        **dynamics_input,
+        tasks = tasks,
+        signal_levels = signal_levels,
+        step_sizes_log2 = step_sizes_log2
+    )
+
     assert flow_loss.numel() == 1
 
 def test_symexp_two_hot():
