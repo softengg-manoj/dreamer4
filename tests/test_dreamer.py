@@ -40,6 +40,9 @@ def test_e2e(
     latents = tokenizer(video, return_latents = True)
     assert latents.shape[-1] == 16
 
+    recon = tokenizer.decode(latents, 256, 256)
+    assert recon.shape == video.shape
+
     query_heads, heads = (16, 4) if grouped_query_attn else (8, 8)
 
     dynamics = DynamicsModel(
