@@ -7,16 +7,24 @@ import torch
 @param('dynamics_with_video_input', (False, True))
 @param('prob_no_shortcut_train', (None, 0., 1.))
 @param('add_task_embeds', (False, True))
+@param('num_spatial_tokens', (2, 8))
 def test_e2e(
     pred_orig_latent,
     grouped_query_attn,
     dynamics_with_video_input,
     prob_no_shortcut_train,
-    add_task_embeds
+    add_task_embeds,
+    num_spatial_tokens
 ):
     from dreamer4.dreamer4 import VideoTokenizer, DynamicsModel
 
-    tokenizer = VideoTokenizer(512, dim_latent = 32, patch_size = 32)
+    tokenizer = VideoTokenizer(
+        512,
+        dim_latent = 32,
+        patch_size = 32,
+        num_latent_tokens = 4
+    )
+
     video = torch.randn(2, 3, 4, 256, 256)
 
     loss = tokenizer(video)
@@ -33,6 +41,8 @@ def test_e2e(
         dim_latent = 32,
         max_steps = 64,
         num_tasks = 4,
+        num_latent_tokens = 4,
+        num_spatial_tokens = num_spatial_tokens,
         pred_orig_latent = pred_orig_latent,
         attn_kwargs = dict(
             heads = heads,
