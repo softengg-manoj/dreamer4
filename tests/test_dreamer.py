@@ -67,7 +67,7 @@ def test_e2e(
     signal_levels = step_sizes_log2 = None
 
     if signal_and_step_passed_in:
-        signal_levels = torch.randint(0, 500, (2, 4))
+        signal_levels = torch.randint(0, 64, (2, 4))
         step_sizes_log2 = torch.randint(1, 6, (2,))
 
     if dynamics_with_video_input:

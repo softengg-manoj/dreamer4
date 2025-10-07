@@ -1279,7 +1279,7 @@ class DynamicsModel(Module):
             noised_latent = torch.randn((batch_size, 1, *latent_shape), device = self.device)
 
             for step in range(num_steps):
-                signal_levels = torch.full((batch_size, 1), step * step_size, device = self.device)
+                signal_levels = torch.full((batch_size, 1), step * step_size, dtype = torch.long, device = self.device)
 
                 noised_latent_with_context, pack_context_shape = pack((latents, noised_latent), 'b * n d')
 
