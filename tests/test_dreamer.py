@@ -88,6 +88,17 @@ def test_e2e(
 
     assert flow_loss.numel() == 1
 
+    # generating
+
+    generated_video = dynamics.generate(
+        time_steps = 10,
+        image_height = 128,
+        image_width = 128,
+        batch_size = 2
+    )
+
+    assert generated_video.shape == (2, 3, 10, 128, 128)
+
     # rl
 
     rewards = torch.randn((2, 4)) * 100.
