@@ -43,7 +43,8 @@ Repository = "https://github.com/lucidrains/dreamer4"
 [project.optional-dependencies]
 examples = []
 test = [
-    "pytest"
+    "pytest",
+    "pytest-shard"
 ]
 
 [tool.pytest.ini_options]

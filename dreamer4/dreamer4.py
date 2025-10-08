@@ -1175,6 +1175,7 @@ class DynamicsModel(Module):
         # each agent token will have the reward embedding of the previous time step - but could eventually just give reward its own token
 
         self.add_reward_embed_to_agent_token = add_reward_embed_to_agent_token
+        self.add_reward_embed_dropout = add_reward_embed_dropout
 
         self.reward_encoder = SymExpTwoHot(
             **reward_encoder_kwargs,
