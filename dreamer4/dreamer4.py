@@ -1298,6 +1298,7 @@ class DynamicsModel(Module):
                     latents = noised_latent_with_context,
                     signal_levels = signal_levels_with_context,
                     step_sizes = step_size,
+                    rewards = decoded_rewards,
                     latent_is_noised = True,
                     return_pred_only = True,
                     return_agent_tokens = True
