@@ -90,14 +90,16 @@ def test_e2e(
 
     # generating
 
-    generated_video = dynamics.generate(
+    generated_video, generated_rewards = dynamics.generate(
         time_steps = 10,
         image_height = 128,
         image_width = 128,
-        batch_size = 2
+        batch_size = 2,
+        return_rewards_per_frame = True
     )
 
     assert generated_video.shape == (2, 3, 10, 128, 128)
+    assert generated_rewards.shape == (2, 10)
 
     # rl
 
