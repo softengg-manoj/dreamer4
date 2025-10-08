@@ -1519,7 +1519,7 @@ class DynamicsWorldModel(Module):
             assert self.num_tasks > 0
 
             task_embeds = self.task_embed(tasks)
-            agent_tokens = agent_tokens + task_embeds
+            agent_tokens = einx.add('b ... d, b d', agent_tokens, task_embeds)
 
         # maybe evolution
 
