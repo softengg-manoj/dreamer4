@@ -911,7 +911,7 @@ class VideoTokenizer(Module):
 
         # decoder attend
 
-        decoder_attend_fn = get_attend_fn(use_flex, seq_len, seq_len, special_attend_only_itself = True)
+        decoder_attend_fn = get_attend_fn(use_flex, seq_len, seq_len, causal = True, num_special_tokens = self.num_latent_tokens, special_attend_only_itself = True)
 
         # decoder attention
 
@@ -1009,7 +1009,7 @@ class VideoTokenizer(Module):
         # modality can only attend to itself while latents can attend to everything
         # similar to agent token in dynamics model
 
-        encoder_attend_fn = get_attend_fn(use_flex, seq_len, seq_len, special_attend_only_itself = False)
+        encoder_attend_fn = get_attend_fn(use_flex, seq_len, seq_len, causal = True, num_special_tokens = self.num_latent_tokens, special_attend_only_itself = False)
 
         # encoder
 
