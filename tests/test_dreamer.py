@@ -20,7 +20,7 @@ def test_e2e(
     signal_and_step_passed_in,
     add_reward_embed_to_agent_token
 ):
-    from dreamer4.dreamer4 import VideoTokenizer, DynamicsModel
+    from dreamer4.dreamer4 import VideoTokenizer, DynamicsWorldModel
 
     tokenizer = VideoTokenizer(
         16,
@@ -45,7 +45,7 @@ def test_e2e(
 
     query_heads, heads = (16, 4) if grouped_query_attn else (8, 8)
 
-    dynamics = DynamicsModel(
+    dynamics = DynamicsWorldModel(
         dim = 16,
         video_tokenizer = tokenizer,
         dim_latent = 16,
