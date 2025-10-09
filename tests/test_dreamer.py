@@ -220,7 +220,8 @@ def test_action_embedder():
 
     embedder = ActionEmbedder(
         512,
-        num_continuous_actions = 2
+        num_continuous_actions = 2,
+        continuous_norm_stats = ((0., 2.), (1., 1.)) # (mean, std) for normalizing each action
     )
 
     actions = torch.randn((2, 3, 2))
