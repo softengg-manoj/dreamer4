@@ -367,6 +367,7 @@ class ActionEmbedder(Module):
         embeds,                           # (... d)
         discrete_action_types = None,    # (na)
         continuous_action_types = None,  # (na)
+        return_split_discrete = False
 
     ):  # (... discrete_na), (... continuous_na 2)
 
@@ -388,6 +389,14 @@ class ActionEmbedder(Module):
                 discrete_action_unembed = discrete_action_unembed[discrete_action_mask]
 
             discrete_action_logits = einsum(embeds, discrete_action_unembed, '... d, na d -> ... na')
+
+        # whether to split the discrete action logits by the number of actions per action type
+
+        if exists(discrete_action_logits) and return_split_discrete:
+
+            split_sizes = self.num_discrete_actions[discrete_action_types] if exists(discrete_action_types) else self.num_discrete_actions
+
+            discrete_action_logits = discrete_action_logits.split(split_sizes.tolist(), dim = -1)
 
         # continuous actions
 

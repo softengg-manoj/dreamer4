@@ -271,6 +271,11 @@ def test_action_embedder():
     assert discrete_logits.shape == (2, 3, 8)
     assert continuous_mean_log_var.shape == (2, 3, 2, 2)
 
+    # return discrete split by number of actions
+
+    discrete_logits, continuous_mean_log_var = embedder.unembed(action_embed, return_split_discrete = True)
+    assert discrete_logits[0].shape == discrete_logits[1].shape == (2, 3, 4)
+
     # unembed subset of actions
 
     discrete_logits, continuous_mean_log_var = embedder.unembed(action_embed, discrete_action_types = 1, continuous_action_types = 0)
