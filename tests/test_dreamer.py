@@ -251,3 +251,22 @@ def test_action_embedder():
     action_embed = embedder(discrete_actions = discrete_actions, continuous_actions = continuous_actions, discrete_action_types = 1, continuous_action_types = 0)
 
     assert action_embed.shape == (2, 3, 512)
+
+    # unembed
+
+    embedder = ActionEmbedder(
+        512,
+        num_discrete_actions = (4, 4),
+        num_continuous_actions = 2,
+        can_unembed = True
+    )
+
+    discrete_actions = torch.randint(0, 4, (2, 3, 2))
+    continuous_actions = torch.randn(2, 3, 2)
+
+    action_embed = embedder(discrete_actions = discrete_actions, continuous_actions = continuous_actions)
+
+    discrete_logits, continuous_mean_log_var = embedder.unembed(action_embed)
+
+    assert discrete_logits.shape == (2, 3, 8)
+    assert continuous_mean_log_var.shape == (2, 3, 2, 2)
