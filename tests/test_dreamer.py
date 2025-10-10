@@ -270,3 +270,10 @@ def test_action_embedder():
 
     assert discrete_logits.shape == (2, 3, 8)
     assert continuous_mean_log_var.shape == (2, 3, 2, 2)
+
+    # unembed subset of actions
+
+    discrete_logits, continuous_mean_log_var = embedder.unembed(action_embed, discrete_action_types = 1, continuous_action_types = 0)
+
+    assert discrete_logits.shape == (2, 3, 4)
+    assert continuous_mean_log_var.shape == (2, 3, 1, 2)
