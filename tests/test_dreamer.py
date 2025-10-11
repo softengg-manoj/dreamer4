@@ -95,7 +95,8 @@ def test_e2e(
         tasks = tasks,
         signal_levels = signal_levels,
         step_sizes_log2 = step_sizes_log2,
-        discrete_actions = actions
+        discrete_actions = actions,
+        add_autoregressive_action_loss = True
     )
 
     assert flow_loss.numel() == 1
@@ -286,3 +287,17 @@ def test_action_embedder():
 
     assert discrete_logits.shape == (2, 3, 4)
     assert continuous_mean_log_var.shape == (2, 3, 1, 2)
+
+    # log probs
+
+    assert discrete_logits.shape == (2, 3, 4)
+    assert continuous_mean_log_var.shape == (2, 3, 1, 2)
+
+    discrete_log_probs, continuous_log_probs = embedder.log_probs(
+        action_embed,
+        discrete_targets = discrete_actions,
+        continuous_targets = continuous_actions
+    )
+
+    assert discrete_log_probs.shape == (2, 3, 2)
+    assert continuous_log_probs.shape == (2, 3, 2)
