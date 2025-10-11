@@ -17,6 +17,8 @@ from torchvision.models import VGG16_Weights
 from x_mlps_pytorch.normed_mlp import create_mlp
 from x_mlps_pytorch.ensemble import Ensemble
 
+from hyper_connections import get_init_and_expand_reduce_stream_functions
+
 from assoc_scan import AssocScan
 
 # ein related
@@ -941,7 +943,8 @@ class VideoTokenizer(Module):
             rope_min_freq = 1.,
             rope_max_freq = 10000.,
             rope_p_zero_freqs = 0.
-        )
+        ),
+        num_residual_streams = 1
     ):
         super().__init__()
 
@@ -952,6 +955,10 @@ class VideoTokenizer(Module):
         assert num_latent_tokens >= 1
         self.num_latent_tokens = num_latent_tokens
         self.latent_tokens = Parameter(randn(num_latent_tokens, dim) * 1e-2)
+
+        # hyper connections
+
+        hyper_conn, self.expand_streams, self.reduce_streams = get_init_and_expand_reduce_stream_functions(num_residual_streams, dim = dim)
 
         # mae masking - Kaiming He paper from long ago
 
@@ -991,8 +998,8 @@ class VideoTokenizer(Module):
 
         for _ in range(encoder_depth):
             encoder_layers.append(ModuleList([
-                Attention(dim = dim, heads = attn_heads, dim_head = attn_dim_head, **attn_kwargs),
-                SwiGLUFeedforward(dim = dim, **ff_kwargs)
+                hyper_conn(branch = Attention(dim = dim, heads = attn_heads, dim_head = attn_dim_head, **attn_kwargs)),
+                hyper_conn(branch = SwiGLUFeedforward(dim = dim, **ff_kwargs))
             ]))
 
         self.encoder_layers = ModuleList(encoder_layers)
@@ -1025,8 +1032,8 @@ class VideoTokenizer(Module):
 
         for _ in range(decoder_depth):
             decoder_layers.append(ModuleList([
-                Attention(dim = dim, heads = attn_heads, dim_head = attn_dim_head, **attn_kwargs),
-                SwiGLUFeedforward(dim = dim, **ff_kwargs)
+                hyper_conn(branch = Attention(dim = dim, heads = attn_heads, dim_head = attn_dim_head, **attn_kwargs)),
+                hyper_conn(branch = SwiGLUFeedforward(dim = dim, **ff_kwargs))
             ]))
 
         self.decoder_layers = ModuleList(decoder_layers)
@@ -1129,10 +1136,14 @@ class VideoTokenizer(Module):
 
         # decoder attention
 
-        for attn, ff in self.decoder_layers:
-            tokens = attn(tokens, rotary_pos_emb = rotary_pos_emb, attend_fn = decoder_attend_fn) + tokens
+        tokens = self.expand_streams(tokens)
 
-            tokens = ff(tokens) + tokens
+        for attn, ff in self.decoder_layers:
+            tokens = attn(tokens, rotary_pos_emb = rotary_pos_emb, attend_fn = decoder_attend_fn)
+
+            tokens = ff(tokens)
+
+        tokens = self.reduce_streams(tokens)
 
         tokens = self.decoder_norm(tokens)
 
@@ -1227,9 +1238,13 @@ class VideoTokenizer(Module):
 
         # encoder
 
+        tokens = self.expand_streams(tokens)
+
         for attn, ff in self.encoder_layers:
-            tokens = attn(tokens, rotary_pos_emb = rotary_pos_emb, attend_fn = encoder_attend_fn) + tokens
-            tokens = ff(tokens) + tokens
+            tokens = attn(tokens, rotary_pos_emb = rotary_pos_emb, attend_fn = encoder_attend_fn)
+            tokens = ff(tokens)
+
+        tokens = self.reduce_streams(tokens)
 
         tokens = self.encoder_norm(tokens)
 
@@ -1304,9 +1319,14 @@ class DynamicsWorldModel(Module):
         reward_loss_weight = 0.1,
         value_head_mlp_depth = 3,
         policy_head_mlp_depth = 3,
-        num_latent_genes = 0                        # for carrying out evolution within the dreams https://web3.arxiv.org/abs/2503.19037
+        num_latent_genes = 0,                       # for carrying out evolution within the dreams https://web3.arxiv.org/abs/2503.19037
+        num_residual_streams = 1
     ):
         super().__init__()
+
+        # hyper connections
+
+        hyper_conn, self.expand_streams, self.reduce_streams = get_init_and_expand_reduce_stream_functions(num_residual_streams, dim = dim)
 
         # can accept raw video if tokenizer is passed in
 
@@ -1467,8 +1487,8 @@ class DynamicsWorldModel(Module):
             layers.append(ModuleList([
                 rearrange_to_attend,
                 rearrange_from_attend,
-                Attention(dim = dim, dim_head = attn_dim_head, **attn_kwargs),
-                SwiGLUFeedforward(dim = dim, **ff_kwargs)
+                hyper_conn(branch = Attention(dim = dim, dim_head = attn_dim_head, **attn_kwargs)),
+                hyper_conn(branch = SwiGLUFeedforward(dim = dim, **ff_kwargs))
             ]))
 
         self.layers = ModuleList(layers)
@@ -1856,6 +1876,8 @@ class DynamicsWorldModel(Module):
 
             # attention
 
+            tokens = self.expand_streams(tokens)
+
             for (pre_attn_rearrange, post_attn_rearrange, attn, ff), layer_is_time in zip(self.layers, self.is_time):
 
                 tokens = pre_attn_rearrange(tokens)
@@ -1875,6 +1897,8 @@ class DynamicsWorldModel(Module):
                 # feedforward layer
 
                 tokens = ff(tokens) + tokens
+
+            tokens = self.reduce_streams(tokens)
 
             # unpack
 
@@ -2011,7 +2035,7 @@ class Dreamer(Module):
     def __init__(
         self,
         video_tokenizer: VideoTokenizer,
-        dynamics_model: DynamicsModel,
+        dynamics_model: DynamicsWorldModel,
         discount_factor = 0.997
     ):
         super().__init__()

@@ -10,6 +10,7 @@ import torch
 @param('num_spatial_tokens', (2, 8))
 @param('signal_and_step_passed_in', (False, True))
 @param('condition_on_actions', (False, True))
+@param('num_residual_streams', (1, 4))
 @param('add_reward_embed_to_agent_token', (False, True))
 def test_e2e(
     pred_orig_latent,
@@ -20,6 +21,7 @@ def test_e2e(
     num_spatial_tokens,
     signal_and_step_passed_in,
     condition_on_actions,
+    num_residual_streams,
     add_reward_embed_to_agent_token
 ):
     from dreamer4.dreamer4 import VideoTokenizer, DynamicsWorldModel
@@ -31,7 +33,8 @@ def test_e2e(
         dim_latent = 16,
         patch_size = 32,
         attn_dim_head = 16,
-        num_latent_tokens = 4
+        num_latent_tokens = 4,
+        num_residual_streams = num_residual_streams
     )
 
     video = torch.randn(2, 3, 4, 256, 256)
@@ -64,7 +67,8 @@ def test_e2e(
             query_heads = query_heads,
         ),
         prob_no_shortcut_train = prob_no_shortcut_train,
-        add_reward_embed_to_agent_token = add_reward_embed_to_agent_token
+        add_reward_embed_to_agent_token = add_reward_embed_to_agent_token,
+        num_residual_streams = num_residual_streams
     )
 
     signal_levels = step_sizes_log2 = None
