@@ -296,8 +296,18 @@ def test_action_embedder():
     discrete_log_probs, continuous_log_probs = embedder.log_probs(
         action_embed,
         discrete_targets = discrete_actions,
-        continuous_targets = continuous_actions
+        continuous_targets = continuous_actions,
+        parallel_discrete_calc = False
     )
 
     assert discrete_log_probs.shape == (2, 3, 2)
     assert continuous_log_probs.shape == (2, 3, 2)
+
+    parallel_discrete_log_probs, _ = embedder.log_probs(
+        action_embed,
+        discrete_targets = discrete_actions,
+        continuous_targets = continuous_actions,
+        parallel_discrete_calc = True
+    )
+
+    assert torch.allclose(discrete_log_probs, parallel_discrete_log_probs, atol = 1e-5)
