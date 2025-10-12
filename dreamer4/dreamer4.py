@@ -90,6 +90,20 @@ def is_power_two(num):
 def log(t, eps = 1e-20):
     return t.clamp(min = eps).log()
 
+def gumbel_noise(t):
+    noise = torch.rand_like(t)
+    return -log(-log(noise))
+
+def gumbel_sample(
+    t,
+    temperature = 1.,
+    dim = -1,
+    keepdim = False,
+    eps = 1e-10
+):
+    noised = (t / max(temperature, eps)) + gumbel_noise(t)
+    return noised.argmax(dim = dim, keepdim = keepdim)
+
 def pack_one(t, pattern):
     packed, packed_shape = pack([t], pattern)
 
@@ -427,6 +441,33 @@ class ActionEmbedder(Module):
             continuous_action_mean_log_var = einsum(embeds, continuous_action_unembed, '... d, na d two -> ... na two')
 
         return discrete_action_logits, continuous_action_mean_log_var
+
+    def sample(
+        self,
+        embed,
+        discrete_temperature = 1.,
+        continuous_temperature = 1.,
+        **kwargs
+    ):
+        discrete_logits, continuous_mean_log_var = self.unembed(embed, return_split_discrete = True, **kwargs)
+
+        sampled_discrete = sampled_continuous = None
+
+        if exists(discrete_logits):
+            sampled_discrete = []
+
+            for one_discrete_logits in discrete_logits:
+                sampled_discrete.append(gumbel_sample(one_discrete_logits, temperature = discrete_temperature, keepdim = True))
+
+            sampled_discrete = cat(sampled_discrete, dim = -1)
+
+        if exists(continuous_mean_log_var):
+            mean, log_var = continuous_mean_log_var.unbind(dim = -1)
+            std = (0.5 * log_var).exp()
+
+            sampled_continuous = mean + std * torch.randn_like(mean) * continuous_temperature
+
+        return sampled_discrete, sampled_continuous
 
     def log_probs(
         self,
