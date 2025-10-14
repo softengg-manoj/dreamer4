@@ -1817,8 +1817,8 @@ class DynamicsWorldModel(Module):
         latent_gene_ids = None,          # (b)
         tasks = None,                    # (b)
         rewards = None,                  # (b t)
-        discrete_actions = None,         # (b t na)
-        continuous_actions = None,       # (b t na)
+        discrete_actions = None,         # (b t na) | (b t-1 na)
+        continuous_actions = None,       # (b t na) | (b t-1 na)
         discrete_action_types = None,    # (na)
         continuous_action_types = None,  # (na)
         return_pred_only = False,
@@ -1979,6 +1979,11 @@ class DynamicsWorldModel(Module):
                 continuous_actions = continuous_actions,
                 continuous_action_types = continuous_action_types
             )
+
+            # handle first timestep not having an associated past action
+
+            if action_tokens.shape[1] == (time - 1):
+                action_tokens = pad_at_dim(action_tokens, (1, 0), value = 0. , dim = 1)
 
             action_tokens = add('1 d, b t d', self.action_learned_embed, action_tokens)
 

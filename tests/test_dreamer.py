@@ -88,7 +88,7 @@ def test_e2e(
 
     actions = None
     if condition_on_actions:
-        actions = torch.randint(0, 4, (2, 4, 1))
+        actions = torch.randint(0, 4, (2, 3, 1))
 
     flow_loss = dynamics(
         **dynamics_input,
