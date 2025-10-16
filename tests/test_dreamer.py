@@ -187,6 +187,46 @@ def test_attend_factory(
 
     assert torch.allclose(flex_out, out, atol = 1e-6)
 
+def test_action_with_world_model():
+    from dreamer4.dreamer4 import VideoTokenizer, DynamicsWorldModel
+
+    tokenizer = VideoTokenizer(
+        512,
+        dim_latent = 32,
+        patch_size = 32,
+        encoder_depth = 1,
+        decoder_depth = 1,
+        attn_heads = 8,
+        image_height = 256,
+        image_width = 256,
+        attn_kwargs = dict(
+            query_heads = 16
+        )
+    )
+
+    dynamics = DynamicsWorldModel(
+        512,
+        num_agents = 1,
+        video_tokenizer = tokenizer,
+        dim_latent = 32,
+        num_discrete_actions = 4
+    )
+
+    rewards = torch.randn(1, 4)
+    discrete_actions = torch.randint(0, 4, (1, 4, 1))
+
+    generated_video, _, generated_rewards, (discrete_actions, continuous_actions) = dynamics.generate(
+        10,
+        return_rewards_per_frame = True,
+        return_agent_actions = True
+    )
+
+    assert generated_video.shape == (1, 3, 10, 256, 256)
+    assert generated_rewards.shape == (1, 10)
+
+    assert discrete_actions.shape == (1, 10, 1)
+    assert continuous_actions is None
+
 def test_action_embedder():
     from dreamer4.dreamer4 import ActionEmbedder
 

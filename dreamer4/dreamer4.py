@@ -63,6 +63,8 @@ TokenizerLosses = namedtuple('TokenizerLosses', ('recon', 'lpips'))
 
 WorldModelLosses = namedtuple('WorldModelLosses', ('flow', 'reward', 'behavior_clone'))
 
+WorldModelGenerations = namedtuple('WorldModelGenerations', ('video', 'latents', 'rewards', 'actions'))
+
 # helpers
 
 def exists(v):
@@ -73,6 +75,9 @@ def default(v, d):
 
 def first(arr):
     return arr[0]
+
+def has_at_least_one(*bools):
+    return sum([*map(int, bools)]) > 0
 
 def ensure_tuple(t):
     return (t,) if not isinstance(t, tuple) else t
@@ -93,6 +98,16 @@ def is_empty(t):
 
 def log(t, eps = 1e-20):
     return t.clamp(min = eps).log()
+
+def safe_cat(*tensors, dim):
+    tensors = [*filter(exists, tensors)]
+
+    if len(tensors) == 0:
+        return None
+    elif len(tensors) == 1:
+        return tensors[0]
+
+    return cat(tensors, dim = dim)
 
 def gumbel_noise(t):
     noise = torch.rand_like(t)
@@ -1630,7 +1645,8 @@ class DynamicsWorldModel(Module):
         image_width = None,
         return_decoded_video = None,
         context_signal_noise = 0.1,       # they do a noising of the past, this was from an old diffusion world modeling paper from EPFL iirc
-        return_rewards_per_frame = False
+        return_rewards_per_frame = False,
+        return_agent_actions = False
 
     ): # (b t n d) | (b c t h w)
 
@@ -1652,6 +1668,14 @@ class DynamicsWorldModel(Module):
         latents = empty((batch_size, 0, *latent_shape), device = self.device)
 
         past_context_noise = latents.clone()
+
+        # maybe return actions
+
+        if return_agent_actions:
+            assert self.action_embedder.has_actions
+
+            decoded_discrete_actions = None
+            decoded_continuous_actions = None
 
         # maybe return rewards
 
@@ -1679,6 +1703,8 @@ class DynamicsWorldModel(Module):
                     signal_levels = signal_levels_with_context,
                     step_sizes = step_size,
                     rewards = decoded_rewards,
+                    discrete_actions = decoded_discrete_actions,
+                    continuous_actions = decoded_continuous_actions,
                     latent_is_noised = True,
                     return_pred_only = True,
                     return_agent_tokens = True
@@ -1710,6 +1736,18 @@ class DynamicsWorldModel(Module):
 
                 decoded_rewards = cat((decoded_rewards, pred_reward), dim = 1)
 
+            # decode the agent actions if needed
+
+            if return_agent_actions:
+                one_agent_embed = agent_embed[:, -1:, agent_index]
+
+                policy_embed = self.policy_head(one_agent_embed)
+
+                sampled_discrete_actions, sampled_continuous_actions = self.action_embedder.sample(policy_embed)
+
+                decoded_discrete_actions = safe_cat(decoded_discrete_actions, sampled_discrete_actions, dim = 1)
+                decoded_continuous_actions = safe_cat(decoded_continuous_actions, sampled_continuous_actions, dim = 1)
+
             # concat the denoised latent
 
             latents = cat((latents, denoised_latent), dim = 1)
@@ -1739,10 +1777,15 @@ class DynamicsWorldModel(Module):
             width = image_width
         )
 
-        if not return_rewards_per_frame:
+        if not has_at_least_one(return_rewards_per_frame, return_agent_actions):
             return generated_video
 
-        return generated_video, decoded_rewards
+        return WorldModelGenerations(
+            video = generated_video,
+            latents = latents,
+            rewards = decoded_rewards if return_rewards_per_frame else None,
+            actions = (decoded_discrete_actions, decoded_continuous_actions) if return_agent_actions else None
+        )
 
     def forward(
         self,
