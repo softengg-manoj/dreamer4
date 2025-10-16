@@ -2032,7 +2032,7 @@ class DynamicsWorldModel(Module):
 
             # pack to tokens for attending
 
-            tokens, packed_tokens_shape = pack([flow_token, space_tokens, registers, action_tokens, agent_tokens], 'b t * d')
+            tokens, packed_tokens_shape = pack([flow_token, space_tokens, registers, action_tokens, reward_tokens, agent_tokens], 'b t * d')
 
             # attend functions for space and time
 
@@ -2087,7 +2087,7 @@ class DynamicsWorldModel(Module):
 
             # unpack
 
-            flow_token, space_tokens, register_tokens, action_tokens, agent_tokens = unpack(tokens, packed_tokens_shape, 'b t * d')
+            flow_token, space_tokens, register_tokens, action_tokens, reward_tokens, agent_tokens = unpack(tokens, packed_tokens_shape, 'b t * d')
 
             # pooling
 
