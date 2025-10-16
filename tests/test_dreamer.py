@@ -103,7 +103,7 @@ def test_e2e(
 
     # generating
 
-    generated_video, generated_rewards = dynamics.generate(
+    generations = dynamics.generate(
         time_steps = 10,
         image_height = 128,
         image_width = 128,
@@ -111,8 +111,8 @@ def test_e2e(
         return_rewards_per_frame = True
     )
 
-    assert generated_video.shape == (2, 3, 10, 128, 128)
-    assert generated_rewards.shape == (2, 10)
+    assert generations.video.shape == (2, 3, 10, 128, 128)
+    assert generations.rewards.shape == (2, 10)
 
     # rl
 
@@ -215,17 +215,25 @@ def test_action_with_world_model():
     rewards = torch.randn(1, 4)
     discrete_actions = torch.randint(0, 4, (1, 4, 1))
 
-    generated_video, _, generated_rewards, (discrete_actions, continuous_actions) = dynamics.generate(
+    gen = dynamics.generate(
         10,
         return_rewards_per_frame = True,
-        return_agent_actions = True
+        return_agent_actions = True,
+        return_log_probs_and_values = True
     )
 
-    assert generated_video.shape == (1, 3, 10, 256, 256)
-    assert generated_rewards.shape == (1, 10)
+    assert gen.video.shape == (1, 3, 10, 256, 256)
+    assert gen.rewards.shape == (1, 10)
+
+    discrete_actions, continuous_actions = gen.actions
 
     assert discrete_actions.shape == (1, 10, 1)
     assert continuous_actions is None
+
+    discrete_log_probs, _ = gen.log_probs
+
+    assert discrete_log_probs.shape == (1, 10, 1)
+    assert gen.values.shape == (1, 10)
 
 def test_action_embedder():
     from dreamer4.dreamer4 import ActionEmbedder
