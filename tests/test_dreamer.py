@@ -216,24 +216,32 @@ def test_action_with_world_model():
     discrete_actions = torch.randint(0, 4, (1, 4, 1))
 
     gen = dynamics.generate(
-        10,
+        16,
+        batch_size = 4,
         return_rewards_per_frame = True,
         return_agent_actions = True,
         return_log_probs_and_values = True
     )
 
-    assert gen.video.shape == (1, 3, 10, 256, 256)
-    assert gen.rewards.shape == (1, 10)
+    assert gen.video.shape == (4, 3, 16, 256, 256)
+    assert gen.rewards.shape == (4, 16)
 
     discrete_actions, continuous_actions = gen.actions
 
-    assert discrete_actions.shape == (1, 10, 1)
+    assert discrete_actions.shape == (4, 16, 1)
     assert continuous_actions is None
 
     discrete_log_probs, _ = gen.log_probs
 
-    assert discrete_log_probs.shape == (1, 10, 1)
-    assert gen.values.shape == (1, 10)
+    assert discrete_log_probs.shape == (4, 16, 1)
+    assert gen.values.shape == (4, 16)
+
+    # take a reinforcement learning step
+
+    actor_loss, critic_loss = dynamics.learn_policy_from_generations(gen)
+
+    actor_loss.backward(retain_graph = True)
+    critic_loss.backward()
 
 def test_action_embedder():
     from dreamer4.dreamer4 import ActionEmbedder
