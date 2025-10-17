@@ -1700,20 +1700,20 @@ class DynamicsWorldModel(Module):
 
         return list(set(params) - set(self.video_tokenizer.parameters()))
 
-    def learn_policy_from_generations(
+    def learn_from_experience(
         self,
-        generation: Experience,
+        experience: Experience,
         policy_optim: Optimizer | None = None,
         value_optim: Optimizer | None = None
     ):
-        latents = generation.latents
-        actions = generation.actions
-        old_log_probs = generation.log_probs
-        old_values = generation.values
-        rewards = generation.rewards
+        latents = experience.latents
+        actions = experience.actions
+        old_log_probs = experience.log_probs
+        old_values = experience.values
+        rewards = experience.rewards
 
-        step_size = generation.step_size
-        agent_index = generation.agent_index
+        step_size = experience.step_size
+        agent_index = experience.agent_index
 
         assert all([*map(exists, (old_log_probs, actions, old_values, rewards, step_size))]), 'the generations need to contain the log probs, values, and rewards for policy optimization'
 
