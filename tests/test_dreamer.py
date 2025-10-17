@@ -366,6 +366,17 @@ def test_action_embedder():
     assert discrete_log_probs.shape == (2, 3, 2)
     assert continuous_log_probs.shape == (2, 3, 2)
 
+    _, (discrete_entropies, continuous_entropies) = embedder.log_probs(
+        action_embed,
+        discrete_targets = discrete_actions,
+        continuous_targets = continuous_actions,
+        parallel_discrete_calc = True,
+        return_entropies = True
+    )
+
+    assert discrete_entropies.shape == (2, 3, 2)
+    assert continuous_entropies.shape == (2, 3, 2)
+
     parallel_discrete_log_probs, _ = embedder.log_probs(
         action_embed,
         discrete_targets = discrete_actions,
