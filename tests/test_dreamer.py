@@ -385,3 +385,19 @@ def test_action_embedder():
     )
 
     assert torch.allclose(discrete_log_probs, parallel_discrete_log_probs, atol = 1e-5)
+
+def test_mtp():
+    from dreamer4.dreamer4 import create_multi_token_prediction_targets
+
+    rewards = torch.randn(3, 16) # (b t)
+
+    reward_targets, mask = create_multi_token_prediction_targets(rewards, 3) # say three token lookahead
+
+    assert reward_targets.shape == (3, 15, 3)
+    assert mask.shape == (3, 15, 3)
+
+    actions = torch.randint(0, 10, (3, 16, 2))
+    action_targets, mask = create_multi_token_prediction_targets(actions, 3)
+
+    assert action_targets.shape == (3, 15, 3, 2)
+    assert mask.shape == (3, 15, 3)

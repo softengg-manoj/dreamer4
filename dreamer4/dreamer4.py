@@ -173,6 +173,28 @@ def l2norm(t):
 def softclamp(t, value = 50.):
     return (t / value).tanh() * value
 
+def create_multi_token_prediction_targets(
+    t, # (b t ...)
+    steps_future
+
+): # (b t-1 steps ...), (b t-1 steps) - targets and the mask, where mask is False for padding
+
+    batch, seq_len, device = *t.shape[:2], t.device
+
+    batch_arange = arange(batch, device = device)
+    seq_arange = arange(seq_len, device = device)[1:]
+    steps_arange = arange(steps_future, device = device)
+
+    indices = add('t, steps -> t steps', seq_arange, steps_arange)
+    mask = indices < seq_len
+
+    batch_arange = rearrange(batch_arange, 'b -> b 1 1')
+
+    indices[~mask] = 0
+    mask = repeat(mask, 't steps -> b t steps', b = batch)
+
+    return t[batch_arange, indices], mask
+
 # loss related
 
 class LPIPSLoss(Module):
