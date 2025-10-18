@@ -401,3 +401,25 @@ def test_mtp():
 
     assert action_targets.shape == (3, 15, 3, 2)
     assert mask.shape == (3, 15, 3)
+
+    from dreamer4.dreamer4 import ActionEmbedder
+
+    embedder = ActionEmbedder(
+        512,
+        num_discrete_actions = (4, 4),
+        num_continuous_actions = 2,
+        can_unembed = True,
+        num_unembed_preds = 8
+    )
+
+    discrete_actions = torch.randint(0, 4, (2, 3, 2))
+    continuous_actions = torch.randn(2, 3, 2)
+
+    action_embed = torch.randn(2, 16, 512)
+    discrete_logits, continuous_logits = embedder.unembed(action_embed)
+
+    assert discrete_logits.shape == (8, 2, 16, 8)
+
+    discrete_logits, continuous_logits = embedder.unembed(action_embed, pred_head_index = 0)
+
+    assert discrete_logits.shape == (2, 16, 8)
