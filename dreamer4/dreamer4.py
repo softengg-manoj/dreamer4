@@ -2431,10 +2431,10 @@ class DynamicsWorldModel(Module):
             )
 
             if exists(discrete_log_probs):
-                behavior_clone_loss = behavior_clone_loss + discrete_log_probs.sum(dim = -1).mean()
+                behavior_clone_loss = behavior_clone_loss - discrete_log_probs.sum(dim = -1).mean()
 
             if exists(continuous_log_probs):
-                behavior_clone_loss = behavior_clone_loss + continuous_log_probs.sum(dim = -1).mean()
+                behavior_clone_loss = behavior_clone_loss - continuous_log_probs.sum(dim = -1).mean()
 
         # gather losses
 
