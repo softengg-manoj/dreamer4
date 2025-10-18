@@ -530,10 +530,8 @@ class ActionEmbedder(Module):
             if exists(continuous_action_types):
                 continuous_action_unembed = continuous_action_unembed[continuous_action_types]
 
-                if isinstance(pred_head_index, int):
-                    continuous_action_unembed = continuous_action_unembed[:, pred_head_index]
-                else:
-                    continuous_action_unembed = continuous_action_unembed.index_select(1, pred_head_index)
+            if exists(pred_head_index):
+                continuous_action_unembed = continuous_action_unembed.index_select(1, pred_head_index)
 
             continuous_action_mean_log_var = einsum(embeds, continuous_action_unembed, '... d, na mtp d two -> mtp ... na two')
 
@@ -2503,12 +2501,12 @@ class DynamicsWorldModel(Module):
             )
 
             if exists(discrete_log_probs):
-                discrete_log_probs = discrete_log_probs.masked_fill(discrete_mask[..., None], 0.)
+                discrete_log_probs = discrete_log_probs.masked_fill(~discrete_mask[..., None], 0.)
 
                 behavior_clone_loss = behavior_clone_loss - reduce(discrete_log_probs, 'mtp b t na -> b t', 'sum').mean()
 
             if exists(continuous_log_probs):
-                continuous_log_probs = continuous_log_probs.masked_fill(continuous_mask[..., None], 0.)
+                continuous_log_probs = continuous_log_probs.masked_fill(~continuous_mask[..., None], 0.)
 
                 behavior_clone_loss = behavior_clone_loss - reduce(continuous_log_probs, 'mtp b t na -> b t', 'sum').mean()
 
