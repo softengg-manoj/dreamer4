@@ -1859,7 +1859,7 @@ class DynamicsWorldModel(Module):
         if isinstance(tasks, int):
             tasks = torch.full((batch_size,), tasks, device = self.device)
 
-        assert tasks.shape[0] == batch_size
+        assert not exists(tasks) or tasks.shape[0] == batch_size
 
         # get state latent shape
 
